@@ -1,29 +1,43 @@
 <?php
 // ❌ WARNING: This script is intentionally vulnerable. Do NOT deploy on a live system.
 
-// Connect to database (hardcoded credentials)
 $conn = new mysqli("localhost", "root", "", "vulnerable_app");
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Get `id` parameter from user input
-$id = $_GET['id'];
+// 🆕 Feature: Search by username
+if (isset($_GET['search'])) {
+    $search = $_GET['search'];
 
-// 🚨 SQL Injection vulnerability
-$sql = "SELECT * FROM users WHERE id = $id";
-$result = $conn->query($sql);
+    // 🚨 SQL Injection possible here
+    $sql = "SELECT * FROM users WHERE username LIKE '%$search%'";
+    $result = $conn->query($sql);
 
-// Output user info
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        // 🚨 XSS vulnerability
-        echo "User: " . $row["username"] . "<br>";
-        echo "Email: " . $row["email"] . "<br>";
+    echo "<h2>Search Results for '$search'</h2>";
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            // 🚨 Stored/Reflected XSS risk
+            echo "User: " . $row["username"] . " - Email: " . $row["email"] . "<br>";
+        }
+    } else {
+        echo "No results found.";
     }
 } else {
-    echo "No user found.";
+    // Original ID-based user lookup
+    $id = $_GET['id'] ?? 1;
+    $sql = "SELECT * FROM users WHERE id = $id";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            echo "User: " . $row["username"] . "<br>";
+            echo "Email: " . $row["email"] . "<br>";
+        }
+    } else {
+        echo "No user found.";
+    }
 }
 
 $conn->close();
