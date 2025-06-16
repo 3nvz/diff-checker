@@ -1,5 +1,5 @@
 <?php
-// ❌ WARNING: This script is intentionally vulnerable. DO NOT deploy this on a real server.
+// ❌ WARNING: This script is intentionally vulnerable. DO NOT deploy on a real server.
 
 $conn = new mysqli("localhost", "root", "", "vulnerable_app");
 
@@ -84,6 +84,29 @@ echo <<<HTML
 <form method="GET">
     <input type="text" name="file" placeholder="Enter file path"><br>
     <button type="submit">Download</button>
+</form>
+HTML;
+
+// 🆕 Admin panel with hardcoded key access (no auth)
+if (isset($_GET['admin']) && $_GET['admin'] === 'letmein123') {  // 🚨 Hardcoded secret key
+    echo "<h2 style='color:red;'>🚨 Admin Panel Access Granted</h2>";
+    echo "<p>Here are the users (faked):</p>";
+    echo "<pre>
+    ID: 1
+    Username: admin
+    Password: admin123
+
+    ID: 2
+    Username: user1
+    Password: password
+    </pre>";
+}
+
+echo <<<HTML
+<h2>Access Admin Panel</h2>
+<form method="GET">
+    <input type="text" name="admin" placeholder="Enter admin key"><br>
+    <button type="submit">Access</button>
 </form>
 HTML;
 
