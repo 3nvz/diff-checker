@@ -51,6 +51,21 @@ if (file_exists("comments.txt")) {
 }
 echo "</div>";
 
+// 🆕 Vulnerable Ping feature (Command Injection)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['host'])) {
+    $host = $_POST['host'];
+    $output = shell_exec("ping -c 2 $host");  // 🚨 Command injection risk
+    echo "<pre>$output</pre>";
+}
+
+echo <<<HTML
+<h2>Ping a Host</h2>
+<form method="POST">
+    <input type="text" name="host" placeholder="e.g., 8.8.8.8 or google.com"><br>
+    <button type="submit">Ping</button>
+</form>
+HTML;
+
 // 🔁 Original user lookup continues
 $id = $_GET['id'] ?? 1;
 $sql = "SELECT * FROM users WHERE id = $id";
