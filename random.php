@@ -1,5 +1,5 @@
 <?php
-// ❌ WARNING: This script is intentionally vulnerable. Do NOT deploy on a live system.
+// ❌ WARNING: This script is intentionally vulnerable. DO NOT deploy this on a real server.
 
 $conn = new mysqli("localhost", "root", "", "vulnerable_app");
 
@@ -66,7 +66,28 @@ echo <<<HTML
 </form>
 HTML;
 
-// 🔁 Original user lookup continues
+// 🆕 LFI Download feature (no sanitization)
+if (isset($_GET['file'])) {
+    $file = $_GET['file'];
+    if (file_exists($file)) {
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . basename($file) . '"');
+        readfile($file);  // 🚨 LFI / file disclosure
+        exit;
+    } else {
+        echo "<p style='color:red;'>File not found: $file</p>";
+    }
+}
+
+echo <<<HTML
+<h2>Download a File</h2>
+<form method="GET">
+    <input type="text" name="file" placeholder="Enter file path"><br>
+    <button type="submit">Download</button>
+</form>
+HTML;
+
+// 🔁 Original user lookup continues (vulnerable to SQLi if unchecked)
 $id = $_GET['id'] ?? 1;
 $sql = "SELECT * FROM users WHERE id = $id";
 $result = $conn->query($sql);
